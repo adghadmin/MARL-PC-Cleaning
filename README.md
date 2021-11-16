@@ -1,5 +1,5 @@
 # MARL-PC-Cleaning
-Open source for the RL-assisted PC cleaning scheme proposed by [*2021 58th DAC*](https://ieeexplore.ieee.org/document/9586084). We propose to mitigate the tail latency of PC cleaning of the DM-SMR drive by using reinforcement learning technology. The DAC paper has been extended to a journal paper submitted to [*IEEE Transactions on Computers*](https://www.computer.org/csdl/journal/tc).
+Open source for the RL-assisted PC cleaning scheme proposed by [*2021 58th DAC*](https://ieeexplore.ieee.org/document/9586084). We propose to mitigate the tail latency of PC cleaning of the DM-SMR drive by using reinforcement learning technology. The DAC paper has been extended to a journal paper submitted to [*IEEE Transactions on Computers*](https://www.computer.org/csdl/journal/tc). The multi-agent reinforcement learning-assisted PC cleaning scheduler has been added.
 
 
 ### Run:
@@ -15,6 +15,7 @@ Open source for the RL-assisted PC cleaning scheme proposed by [*2021 58th DAC*]
 2. We build our scheme based on the initial version published on [*FAST'15 - Skylight*](http://sssl.ccs.neu.edu/skylight)[1]. This is a very creative and enlightening work.
 3. We use [*hfplayer*](https://github.com/umn-cris/hfplayer) as our block I/O replayer. This amazing work has been published on *FAST'17*[2] and you can find more details on their paper and Github website.
 4. In order to get more accuate results, you have to shut down the write cache and the automatic power-saving mechanism of your disk with the help of *hdparm* tool.
+5. The script file **con_descon_disk.sh** can be used to construct and destruct the virtual disk in the system, you can also change the cache cleaning scheduling scheme in it. The script file **iotest.sh** is used to replay the workload, and you can switch to different workloads by changing it.
 
 ### Support:
 Please post your question in the github Issues page: https://github.com/adghadmin/MARL-PC-Cleaning/issues.
