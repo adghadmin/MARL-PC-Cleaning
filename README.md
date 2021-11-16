@@ -17,7 +17,7 @@ Open source for the RL-assisted PC cleaning scheme proposed by [*2021 58th DAC*]
 4. In order to get more accuate results, you have to shut down the write cache and the automatic power-saving mechanism of your disk with the help of *hdparm* tool.
 5. The script file **con_descon_disk.sh** can be used to construct and destruct the virtual disk in the system, you can also change the cache cleaning scheduling scheme in it. The script file **iotest.sh** is used to replay the workload, and you can switch to different workloads by changing it.
 6. **q2c.lat_253,0_q2c.dat** is one sample data we provide to help you better analyze the experimental results, the two columns of data represent the time of I/O requests and I/O latency (s), respectively.
-7. The workload files are too memory-consuming to be all uploaded, so we have provided the workload file of **wo1**, as for the other workload files, you can easily find on the website or contact me to obtain.
+7. The workload files are too memory-consuming to be all uploaded, so we have provided the workload file of **wo1**, as for the other workload files, you can easily find on the website or [contact me](yuhanyang@mail.sdu.edu.cn) to obtain.
 
 ### Support:
 Please post your question in the github Issues page: https://github.com/adghadmin/MARL-PC-Cleaning/issues.
