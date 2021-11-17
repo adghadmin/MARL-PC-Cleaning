@@ -1087,19 +1087,21 @@ static void start_partialGC(struct sadc_ctx *sc)
 }
 
 
-static void do_partialGC(struct sadc_ctx *sc, int32_t nr_band_to_gc)
+static void do_partialGC(struct sadc_ctx *sc, int32_t nr_band_to_gc, int region_of_band)
 {
         int32_t base, i;
         if(nr_band_to_gc==0){
                 return;
         }
-        DMINFO("sadc: Starting partialGC, # of bands: %d.\n", nr_band_to_gc);
+        DMINFO("sadc: Starting partialGC, # of bands: %d, num of region: %d.\n", nr_band_to_gc, region_of_band);
         if(!sc->partialGC){
                 start_partialGC(sc);
         }
         if(init_complete)
                 print_cb_info(sc);
         base = sc->current_partialGC_band_list_index;
+        sc->partialGC_band_region= sc->partialGC_band_index*num_of_agent*sc->band_size/(sc->disk_size-sc->cache_size);
+        if(sc->partialGC_band_region == region_of_band){
         for(i=0;i<nr_band_to_gc;i++){
                 if(sc->partialGC_band_list[base+i]==-1){
                         goto end;
@@ -1109,6 +1111,7 @@ static void do_partialGC(struct sadc_ctx *sc, int32_t nr_band_to_gc)
         }
         sc->current_partialGC_band_list_index += nr_band_to_gc;
         DMINFO("sadc: PartialGC complete.\n");
+        }
         return;
 end:
         end_of_partialGC(sc);
@@ -1203,7 +1206,7 @@ static void sadcd(struct work_struct *work)
                 expore_count[i] += 1;
                 //do_action() idle/GC
                 printk("sadc: sadcd-before do_partialGC iteration: %d", expore_count[i]);
-                do_partialGC(sc, action_list[current_action[i]]);
+                do_partialGC(sc, action_list[i][current_action[i]], i);
                 }
 
                 reward = get_reward(io_end_time - io_begin_time);
