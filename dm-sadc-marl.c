@@ -7,8 +7,6 @@
 #include <linux/vmalloc.h>
 #include <linux/kernel.h>
 #include <linux/time.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #define DM_MSG_PREFIX "sadc"
 
@@ -90,8 +88,8 @@ static int32_t clean_time=0;
 static int32_t io_end_time=0;
 static int32_t q[num_of_agent][state_max][action_max] = { 0 };
 static int32_t expore_count[num_of_agent] = {0};
-static int32_t epsilon1[num_of_agent] = 90;
-static int32_t epsilon2[num_of_agent] = 99;
+static int32_t epsilon1[4] = {90,90,90,90};
+static int32_t epsilon2[4] = {99,99,99,99};
 static int32_t min_pba_in_cache_band = 256;
 static int32_t init_complete = 0;
 
@@ -205,7 +203,7 @@ static int32_t max_value_q(struct state* s, int agent_num){
 static int32_t max_action(struct state* s, int agent_num){
     int32_t i=1,a=0;
     int32_t row = get_row_q(s);
-    float max = q[agent_num][row][0];
+    int32_t max = q[agent_num][row][0];
     for(;i<action_max;i++){
         if(q[agent_num][row][i]>max)
         {
@@ -287,8 +285,9 @@ static struct state get_next_state(struct state* s, int32_t* _current_action, in
     }else{
             ns.previous_interval = 1;
     }
-    int sum=0;
-    for (int i=0; i<num_of_agent; i++) sum+= _current_action[i];
+    int32_t sum=0;
+    int32_t i;
+    for (i=0; i<num_of_agent; i++) sum+= _current_action[i];
     ns.previous_cleaned_bands = sum;
     ns.bands_left = get_bands_left(b);
     ns.pc_utilization = get_pc_utilization(min);
@@ -996,7 +995,7 @@ static int32_t do_gc_cache_band(struct sadc_ctx *sc, struct cache_band *cb)
 
 static void next_partialGC(struct sadc_ctx *sc, struct bio *bio)
 {
-        int32_t target_cb_index,t,i=0;
+        int32_t target_cb_index,t = 0;
         int32_t b = bio_band(sc, bio);
         int32_t nr_pbas = pbas_in_band(sc, bio, b);
         struct cache_band *cb = cache_band(sc, b);
@@ -1128,7 +1127,7 @@ static int32_t get_random_number(void)
 
 static int32_t get_pc_used_min(struct sadc_ctx *sc){
         int32_t i=0, f=0, min = sc->band_size_pbas;
-        int32_t flag = 0;
+       // int32_t flag = 0;
         for(;i<sc->nr_cache_bands-1;i++){
             f = free_pbas_in_cache_band(sc, &sc->cache_bands[sc->cache_bands_map[i]]);
             //printk("free pbas in cache band %d: %d", i, f);
@@ -1141,7 +1140,7 @@ static int32_t get_pc_used_min(struct sadc_ctx *sc){
 
 static int32_t get_pc_used_percentage(struct sadc_ctx *sc){
         int32_t i=0, f=0;
-        int32_t flag = 0;
+        //int32_t flag = 0;
         for(;i<sc->nr_cache_bands-1;i++){
             f = free_pbas_in_cache_band(sc, &sc->cache_bands[sc->cache_bands_map[i]]);
             //printk("free pbas in cache band %d: %d", i, f);
@@ -1180,25 +1179,26 @@ static void sadcd(struct work_struct *work)
             if (RL_GC && get_pc_used_percentage(sc)) {
                 do_gettimeofday(&ct);
                 io_end_time = ct.tv_sec * 1000 + ct.tv_usec / 1000; //ms
-                for(int i=0; i<num_of_agent; i++){
+                int32_t i;
+                for(i=0; i<num_of_agent; i++){
 
                 randNum = get_random_number();
                 if (expore_count[i] < 3000) {
-                    if ((((randNum + short_max) / (short_max * 2 - 1)) / 100 > epsilon1[i]) || (is_empty_q(&current_state) == 1)) {
+                    if ((((randNum + short_max) / (short_max * 2 - 1)) / 100 > epsilon1[i]) || (is_empty_q(&current_state, i) == 1)) {
                         current_action[i] = get_random_number() % (action_max);
                     }
                     else {
                             
-                        current_action[i] = max_action(&current_state);
+                        current_action[i] = max_action(&current_state, i);
                         if(flag_policy)
                         current_action[i] = current_policy[i];
                     }
                 }else {
-                    if ((((randNum + short_max) / (short_max * 2 - 1)) / 100 > epsilon2[i]) || (is_empty_q(&current_state) == 1)) {
+                    if ((((randNum + short_max) / (short_max * 2 - 1)) / 100 > epsilon2[i]) || (is_empty_q(&current_state, i) == 1)) {
                         current_action[i] = get_random_number() % (action_max);
                     }
                     else {
-                        current_action[i] = max_action(&current_state);
+                        current_action[i] = max_action(&current_state, i);
                         if(flag_policy)
                         current_action[i] = current_policy[i];
                     }
@@ -1213,14 +1213,15 @@ static void sadcd(struct work_struct *work)
                 next_state = get_next_state(&current_state, current_action, \
                         sc->current_partialGC_band_list_max-sc->current_partialGC_band_list_index,\
                         get_pc_used_min(sc));
-                for(int i=0; i<num_of_agent; i++){
-                next_state_max_q = max_value_q(&next_state, i);
+                        int32_t j;
+                for(j=0; j<num_of_agent; j++){
+                next_state_max_q = max_value_q(&next_state, j);
                 row = get_row_q(&current_state);
-                int32_t q_before= q[i][row][current_action[i]];
+                int32_t q_before= q[j][row][current_action[j]];
                 int32_t q_after= (reward + gamma * next_state_max_q / 10 ) / 10;
                 if (q_after>q_before) {
-                        q[i][row][current_action[i]] = q_after;
-                        current_policy[i] = current_action[i];
+                        q[j][row][current_action[j]] = q_after;
+                        current_policy[j] = current_action[j];
                 }
                 }
             }

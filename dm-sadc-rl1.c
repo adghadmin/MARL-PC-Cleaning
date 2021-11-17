@@ -7,8 +7,6 @@
 #include <linux/vmalloc.h>
 #include <linux/kernel.h>
 #include <linux/time.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #define DM_MSG_PREFIX "sadc"
 
