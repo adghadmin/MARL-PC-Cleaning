@@ -1,5 +1,5 @@
 # MARL-PC-Cleaning
-Open source for the RL-assisted PC cleaning scheme proposed by [*2021 58th DAC*](https://ieeexplore.ieee.org/document/9586084). We propose to mitigate the tail latency of PC cleaning of the DM-SMR drive by using reinforcement learning technology. The DAC paper has been extended to a journal paper submitted to [*IEEE Transactions on Computers*](https://www.computer.org/csdl/journal/tc). The multi-agent reinforcement learning-assisted PC cleaning scheduler has been added.
+Open source for the RL-assisted PC cleaning scheme. We propose to mitigate the tail latency of PC cleaning of the DM-SMR drive by using reinforcement learning technology. The multi-agent reinforcement learning-assisted PC cleaning scheduler has been added.
 
 
 ### Run:
